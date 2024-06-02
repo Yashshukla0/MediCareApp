@@ -1,0 +1,40 @@
+import pickle
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    data = request.json
+    print("Received input data:", data)
+
+    try:
+        with open('model.pkl', 'rb') as file:
+            model = pickle.load(file)
+            print("Model loaded successfully")
+    except pickle.UnpicklingError as e:
+        print("Error loading model:", e)
+        return jsonify({'error': 'Model loading failed'})
+
+    Age = data['age']
+    Diabetes = data['diabetes']
+    BloodPressureProblems = data['bloodPressureProblems']
+    AnyTransplants = data['anyTransplants']
+    AnyChronicDiseases = data['anyChronicDiseases']
+    Height = data['height']
+    Weight = data['weight']
+    KnownAllergies = data['knownAllergies']
+    HistoryOfCancerInFamily = data['historyOfCancerInFamily']
+    NumberOfMajorSurgeries = data['numberOfMajorSurgeries']
+    
+
+    
+    prediction = model.predict([[Age, Diabetes, BloodPressureProblems, AnyTransplants, 
+                                    AnyChronicDiseases, Height, Weight, KnownAllergies, 
+                                    HistoryOfCancerInFamily, NumberOfMajorSurgeries]])[0]
+    print("Prediction successful:", prediction)
+    return jsonify({'PremiumPrice': prediction})
+    
+
+if __name__ == '__main__':
+    app.run(debug=True, port=8086)
